@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Your Interface</title>
+<link rel="icon" type="image/svg+xml" href="data/favicon.svg">
+<style>
+/* ============================================================
+   REFERENZ-DESIGN – so sehen neue Oberflächen aus.
+   Regeln stehen ausführlich in design_regeln.md.
+   Diese Datei ist die Vorlage zum Kopieren: CSS-Block 1 bis 7 übernehmen,
+   Beispiel-Inhalt (HTML) ersetzen.
+   ============================================================ */
+
+/* ---------- 1. SCHRIFTEN (lokal aus @fonts, nur Latein) ----------
+   Genau drei Rollen, keine weiteren Schriften:
+     --font-comic  verspielte Überschriften (oder ganzer Text für Kinder)
+     --font-text   regulärer Text
+     --font-code   Code-artiges: Textfelder, Prompt-Blöcke, Info, Fehlermeldungen
+   Fehlt eine Datei, greift die Ersatzschrift dahinter. */
+@font-face { font-family: 'Comic Relief'; font-weight: 400; font-display: swap;
+  src: url('data/@fonts/comic-relief/comic-relief-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Comic Relief'; font-weight: 700; font-display: swap;
+  src: url('data/@fonts/comic-relief/comic-relief-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'M PLUS Rounded 1c'; font-weight: 400; font-display: swap;
+  src: url('data/@fonts/m-plus-rounded-1c/m-plus-rounded-1c-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'M PLUS Rounded 1c'; font-weight: 500; font-display: swap;
+  src: url('data/@fonts/m-plus-rounded-1c/m-plus-rounded-1c-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'M PLUS Rounded 1c'; font-weight: 700; font-display: swap;
+  src: url('data/@fonts/m-plus-rounded-1c/m-plus-rounded-1c-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-display: swap;
+  src: url('data/@fonts/ibm-plex-mono/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-display: swap;
+  src: url('data/@fonts/ibm-plex-mono/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 700; font-display: swap;
+  src: url('data/@fonts/ibm-plex-mono/ibm-plex-mono-latin-700-normal.woff2') format('woff2'); }
+
+:root {
+  --font-comic: 'Comic Relief', 'Comic Sans MS', sans-serif;
+  --font-text:  'M PLUS Rounded 1c', 'Segoe UI', sans-serif;
+  --font-code:  'IBM Plex Mono', Consolas, monospace;
+
+  /* ---------- 2. FARBROLLEN (Light = Standardwerte) ---------- */
+  --bg: #FFFFFF;              /* NUR Seitenhintergrund, nie in Fenstern */
+  --card-bg: #FFF9E5;         /* Fenster, Felder, Buttons */
+  --text-primary: #0A0A0A;
+  --text-secondary: #73736D;
+  --text-emphasis: #0A0A0A;
+  --border: #E0E0E0;
+  --stroke: #0A0A0A;          /* Icons / Illustrationen */
+
+  /* Mischrichtung für Hervorhebung und Fokus: Light = Richtung Schwarz */
+  --mix-target: black;
+  --emph-amount: 5%;          /* Stärke der Button-Hervorhebung (eine Stellschraube) */
+  --focus-amount: 20%;        /* Stärke des Fokus-/Hover-Rahmens */
+  --field-inset: 21px;        /* 1px Rahmen + 20px Innenabstand: Text in Feldern, Textblock, Info, Fehler und Status beginnt überall gleich weit links */
+}
+:root[data-theme="dark"] {
+  --bg: #121212;
+  --card-bg: #1E1E1E;
+  --text-primary: #B5B5B5;
+  --text-secondary: #A0A0A0;
+  --text-emphasis: #CBCBCB;
+  --border: #454545;
+  --stroke: #E6E6E2;
+
+  --mix-target: white;        /* Dark = Richtung Weiß */
+}
+
+/* Schriftstärke: Dunkle Schrift auf hellem Grund wirkt dünner. Deshalb gilt FEST:
+   Light-Modus = 500, Dark-Modus = 400, jeweils für reguläre Schrift UND Code-Schrift. */
+:root { --weight-text: 500; --weight-code: 500; }
+:root[data-theme="dark"] { --weight-text: 400; --weight-code: 400; }
+
+/* Optional: ganzer Text in Comic (z. B. für Kinder). Eine Klasse am <body>. */
+body.text-comic { --font-text: var(--font-comic); --weight-text: 400; }   /* Comic hat nur 400/700 */
+
+/* ---------- 3. SEITE ---------- */
+body {
+  margin: 0; padding: 24px 16px 56px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-text);
+  font-size: 16px; line-height: 1.5;
+  font-weight: var(--weight-text);
+}
+h1, h2, h3 { font-family: var(--font-comic); color: var(--text-emphasis); margin: 0; }
+h1 { font-size: 26px; text-align: center; margin-bottom: 6px; }
+h2 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+.subtitle { text-align: center; color: var(--text-secondary); margin: 0 0 24px; }
+
+/* ---------- 4. FENSTER (Karten) – immer --card-bg, nie --bg, keine Schatten ---------- */
+.stack { max-width: 900px; margin: 0 auto; display: grid; gap: 20px; }
+.window {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* ---------- 5. FELDER ---------- */
+/* Gleiche Farbe wie das Fenster, nur Rahmen. Textfelder und Prompt-Blöcke in Code-Schrift. */
+.field {
+  display: block; width: 100%; box-sizing: border-box;
+  margin-bottom: 10px; padding: 8px 20px;
+  font: inherit; font-size: 14px;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+textarea.field, pre.field { font-family: var(--font-code); font-weight: var(--weight-code); }
+textarea.field { height: 120px; resize: vertical; }
+.field::placeholder { color: var(--text-secondary); }
+
+/* Fokus: Chrome-Standardrahmen aus, eigener 2px-Rahmen.
+   Farbe = --border, gemischt zu 20 % Richtung Weiß (Dark) bzw. Schwarz (Light).
+   Padding minus 1px, damit nichts springt. */
+.field:focus {
+  outline: none;
+  border-width: 2px;
+  padding: 7px 19px;
+  border-color: color-mix(in srgb, var(--border), var(--mix-target) var(--focus-amount));
+}
+
+/* ---------- 6. BUTTONS ---------- */
+.btn-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+button.btn {
+  font: inherit; font-size: 14px;
+  padding: 8px 16px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+/* Hover auf AKTIVEN Buttons: gleicher Rahmen wie Fokus im Feld */
+button.btn:hover:not(:disabled) {
+  border-width: 2px;
+  padding: 7px 15px;
+  border-color: color-mix(in srgb, var(--border), var(--mix-target) var(--focus-amount));
+}
+/* "Nächster Schritt": einfarbig, Card-Farbe gemischt mit Weiß (Dark) / Schwarz (Light) */
+button.btn.btn-emphasized {
+  background: color-mix(in srgb, var(--card-bg), var(--mix-target) var(--emph-amount));
+  color: var(--text-emphasis);
+}
+/* Deaktiviert: keine eigene Optik, Maus wird komplett ignoriert (normaler Pfeil, kein Hover) */
+button.btn:disabled { pointer-events: none; }
+
+/* Tag/Nacht-Button: einziger Umschalter, KEIN Sprachumschalter */
+.theme-toggle {
+  position: fixed; top: 14px; right: 18px;
+  width: 34px; height: 34px; padding: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-bg); color: var(--text-primary);
+  border: 1px solid var(--border); font-size: 16px; cursor: pointer;
+}
+
+/* Überschriften und Buttons sind mittig (Standard). Linksbündige Texte im Fenster beginnen auf Höhe des Textes in der Eingabezeile */
+.info, .error, .status { padding-left: var(--field-inset); }
+
+/* ---------- 7. HINWEISE: Info, Fehler, Status in Code-Schrift ---------- */
+.info, .error, .status { font-family: var(--font-code); font-weight: var(--weight-code); font-size: 13px; color: var(--text-secondary); }
+.status { margin-top: 10px; min-height: 18px; }
+.error { color: var(--text-emphasis); }
+
+
+/* ---------- 8. PLATTE (Logo), reines CSS, drehend ----------
+   Aufbau: .vinyl (Rand) > .grooves (drehende Ebene: durchgehende Rillen + zwei Lichtreflexe).
+   Die Reflexe machen die Drehung sichtbar. Etikett = ::after, Loch = Verlauf darin.
+   Geschwindigkeit: eine Variable (--spin) = Sekunden pro Umdrehung.
+   Ausnahme von der --bg-Regel: das Etikett darf --bg als Füllung nutzen. */
+.vinyl {
+  --spin: 24s;
+  position: relative; width: 96px; height: 96px; margin: 0 auto 18px;
+  border-radius: 50%; border: 2px solid var(--stroke);
+}
+.vinyl::after {                       /* Etikett mit Loch (liegt über den Rillen) */
+  content: ""; position: absolute; top: 50%; left: 50%; width: 26px; height: 26px;
+  transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid var(--stroke);
+  background: radial-gradient(circle, var(--stroke) 0 3px, var(--bg) 3.5px);
+}
+.grooves {                            /* durchgehende Rillen: 4px frei, 1px Linie, wiederholt */
+  position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-radial-gradient(circle at center, transparent 0 4px, var(--border) 4px 5px);
+  animation: vinyl-spin var(--spin) linear infinite;
+}
+.grooves::before {                    /* zwei gegenüberliegende Lichtreflexe (Kegelverlauf) */
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  --glint: color-mix(in srgb, var(--stroke) 35%, transparent);
+  background: conic-gradient(transparent 0 20deg, var(--glint) 40deg, transparent 60deg 200deg,
+                             var(--glint) 220deg, transparent 240deg 360deg);
+}
+@keyframes vinyl-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .grooves { animation: none; } }
+
+
+/* Gag: Klick aufs Etikett öffnet ein Fenster zum Einstellen der Drehgeschwindigkeit.
+   Das Etikett ist ein unsichtbarer Button über dem Etikett (per Tastatur erreichbar). */
+.vinyl-label {
+  position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; z-index: 2;
+  transform: translate(-50%, -50%); border-radius: 50%; padding: 0;
+  border: none; background: transparent; cursor: pointer;
+}
+.overlay {
+  position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: color-mix(in srgb, var(--bg) 75%, transparent);
+}
+.overlay[hidden] { display: none; }
+.modal { width: 100%; max-width: 360px; }
+.modal .info { padding-left: 0; text-align: center; margin: 6px 0 14px; }
+.modal input[type="range"] { width: 100%; accent-color: var(--text-secondary); margin: 6px 0 0; }
+
+
+/* Aufklappbarer Textblock: Überschrift (H3) mit Dreieck davor, darunter der Text.
+   Nur die Überschrift ist wegen des Dreiecks eingerückt, der Text beginnt normal links.
+   Zugeklappt: 2 Zeilen Text sichtbar. Dreieck = Zeichen aus der Schrift (▸ zu, ▾ offen). */
+.textblock {
+  margin-bottom: 10px; padding: 20px;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+}
+.texthead { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.texthead h3 { margin: 0; font-size: 17px; line-height: 1.4; }
+.chevron {
+  flex: none; padding: 0; border: none; background: transparent;
+  color: var(--text-secondary); font-size: 17px; line-height: 1.4; cursor: pointer;
+}
+.chevron::before { content: "▸"; }
+.textblock.open .chevron::before { content: "▾"; }
+.textbody { font-size: 15px; line-height: 24px; text-align: justify; hyphens: auto; }   /* Blocksatz, Silbentrennung (lang="de") */
+.textbody p { margin: 0 0 10px; }
+.textbody p:last-child { margin-bottom: 0; }
+.textblock:not(.open) .textbody p:first-child {           /* zugeklappt: nur 2 Zeilen */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0;
+}
+.textblock:not(.open) .more { display: none; }
+
+/* Farbmuster (nur für diese Referenzseite) */
+/* Drei Karten pro Zeile (bei normaler Breite), zentrierter Inhalt.
+   Ein Klick auf den Farbbalken öffnet die Farbauswahl des Browsers, die Farbe wirkt sofort auf die ganze Seite. */
+.swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 700px) { .swatches { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px) { .swatches { grid-template-columns: 1fr; } }
+.swatch {
+  border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+  background: var(--card-bg); text-align: center; font-size: 14px;
+}
+.swatch .chip {                       /* der anklickbare Farbbalken */
+  position: relative; display: block; height: 64px; margin-bottom: 10px;
+  border-radius: 6px; border: 1px solid var(--border); cursor: pointer;
+}
+.swatch .chip input[type="color"] {   /* unsichtbar über dem Balken, öffnet die Farbauswahl */
+  position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: none;
+  opacity: 0; cursor: pointer;
+}
+.swatch .name { display: block; }
+.swatch .hex { display: block; margin-top: 2px; font-family: var(--font-code); font-weight: var(--weight-code); font-size: 12px; color: var(--text-secondary); }
+.demo-only { margin-top: 10px; }
+
+/* ---------- DRUCK: strikt Schwarz/Weiß, unabhängig vom Theme ---------- */
+@media print {
+  :root, :root[data-theme="dark"] {
+    --bg: #fff; --card-bg: #fff; --text-primary: #000; --text-secondary: #000;
+    --text-emphasis: #000; --border: #000;
+  }
+  .theme-toggle, .btn-row, .demo-only { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle day/night mode">☾</button>
+
+<div class="stack">
+  <header>
+    <div class="vinyl"><div class="grooves"></div>
+      <button class="vinyl-label" id="vinylLabel" aria-label="Set rotation speed" title="Set rotation speed"></button></div>
+    <h1>Color Your Interface</h1>
+    <p class="subtitle">Find the perfect colors for your minimalist website.</p>
+  </header>
+
+  <section class="window">
+    <h2>Input and buttons</h2>
+    <div class="textblock" id="textBlock">
+      <div class="texthead">
+        <button class="chevron" id="textToggle" aria-expanded="false" aria-controls="textBody" aria-label="Expand text"></button>
+        <h3>Find your color palette</h3>
+      </div>
+      <div class="textbody" id="textBody">
+        <p>Experiment with colors and find the perfect palette for your minimalist website.</p>
+        <p class="more">Click any color swatch to change a color and see the result instantly across the entire page. Try different combinations, compare their visual impact, and adjust the colors until everything feels right.</p>
+        <p class="more">Found your perfect palette? Click “Copy Colors” to copy the color values for both light and dark mode as a table of CSS variables, ready to use in your own project.</p>
+        <p class="more">You can reset the colors and start experimenting again at any time.</p>
+      </div>
+    </div>
+    <textarea class="field" placeholder="Text field in code font (IBM Plex Mono)"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-emphasized" data-act="create">Create Sheet</button>
+      <button class="btn" data-act="print" disabled>Print</button>
+      <button class="btn" data-act="reset">Reset</button>
+    </div>
+    <div class="status" id="status"></div>
+    <p class="info">Info text in code font. Print becomes active only after “Create Sheet”.</p>
+    <p class="error">Error message: this is how a notice looks when something is missing.</p>
+  </section>
+
+  <section class="window">
+    <h2>Color roles</h2>
+    <!-- Karten werden per Skript erzeugt (siehe "Farbrollen ändern" unten). Klick auf einen Balken = Farbe ändern. -->
+    <div class="swatches" id="swatches"></div>
+    <div class="demo-only btn-row">
+      <button class="btn" id="colorReset">Reset Colors</button>
+      <button class="btn" id="colorCopy">Copy Colors</button>
+      <button class="btn" id="comicToggle">All text in Comic: off</button>
+    </div>
+
+  </section>
+</div>
+
+<!-- Gag-Fenster: Drehgeschwindigkeit (Klick auf das Plattenetikett). Klick daneben schließt und übernimmt den Wert. -->
+<div class="overlay" id="spinOverlay" hidden>
+  <div class="window modal" role="dialog" aria-label="Rotation speed">
+    <h2>Rotation speed</h2>
+    <div class="vinyl" id="previewVinyl"><div class="grooves"></div></div>
+    <input type="range" id="spinRange" min="20" max="60" step="2" value="24" aria-label="Seconds per revolution">
+    <p class="info" id="spinValue"></p>
+  </div>
+</div>
+
+<script>
+/* Tag/Nacht: startet mit der Systemeinstellung, Button schaltet um. Läuft auch ohne Speicher. */
+const root = document.documentElement;
+const themeBtn = document.getElementById('themeToggle');
+let dark = true;
+try { dark = !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+function setTheme(d) {
+  root.setAttribute('data-theme', d ? 'dark' : 'light');
+  themeBtn.textContent = d ? '☀' : '☾';
+  if (window.applyColors) window.applyColors();     // selbst gewählte Farben des Modus anwenden
+}
+setTheme(dark);
+themeBtn.addEventListener('click', () => { dark = !dark; setTheme(dark); });
+
+/* Farbrollen ändern: Klick auf einen Farbbalken öffnet die Farbauswahl, das Ergebnis ist sofort sichtbar.
+   Gilt nur für den gerade aktiven Modus (Dark oder Light) und nur bis zum Neuladen (nichts wird gespeichert). */
+const ROLLEN = [                         // [CSS-Variable, Anzeigename, Dark-Standard, Light-Standard]
+  ['--bg',             '--bg (page only)', '#121212', '#FFFFFF'],
+  ['--card-bg',        '--card-bg',        '#1E1E1E', '#FFF9E5'],
+  ['--text-primary',   '--text-primary',   '#B5B5B5', '#0A0A0A'],
+  ['--text-secondary', '--text-secondary', '#A0A0A0', '#73736D'],
+  ['--text-emphasis',  '--text-emphasis',  '#CBCBCB', '#0A0A0A'],
+  ['--border',         '--border',         '#454545', '#E0E0E0']
+];
+const eigeneFarben = { dark: {}, light: {} };
+const swatchBox = document.getElementById('swatches');
+const swatchRefs = {};
+const modus = () => (dark ? 'dark' : 'light');
+const standardFarbe = r => (dark ? r[2] : r[3]);
+ROLLEN.forEach(r => {
+  const card = document.createElement('div'); card.className = 'swatch';
+  const chip = document.createElement('label'); chip.className = 'chip';
+  const inp = document.createElement('input'); inp.type = 'color';
+  inp.setAttribute('aria-label', 'Color for ' + r[1]);
+  const name = document.createElement('span'); name.className = 'name'; name.textContent = r[1];
+  const hex = document.createElement('span'); hex.className = 'hex';
+  inp.addEventListener('input', () => { eigeneFarben[modus()][r[0]] = inp.value; window.applyColors(); });
+  chip.appendChild(inp); card.append(chip, name, hex); swatchBox.appendChild(card);
+  swatchRefs[r[0]] = { chip, inp, hex };
+});
+window.applyColors = function () {
+  ROLLEN.forEach(r => {
+    const c = (eigeneFarben[modus()][r[0]] || standardFarbe(r));
+    if (eigeneFarben[modus()][r[0]]) root.style.setProperty(r[0], c); else root.style.removeProperty(r[0]);
+    const ref = swatchRefs[r[0]];
+    ref.chip.style.background = c; ref.inp.value = c.toLowerCase(); ref.hex.textContent = c.toUpperCase();
+  });
+};
+window.applyColors();
+document.getElementById('colorReset').addEventListener('click', () => { eigeneFarben[modus()] = {}; window.applyColors(); });
+document.getElementById('colorCopy').addEventListener('click', () => {
+  const wert = (r, m) => (eigeneFarben[m][r[0]] || (m === 'dark' ? r[2] : r[3])).toUpperCase();
+  const zeilen = ROLLEN.map(r => '| `' + r[0] + '` | `' + wert(r, 'dark') + '` | `' + wert(r, 'light') + '` |');
+  const text = 'Color roles\n\n| Role | Dark | Light |\n|---|---|---|\n' + zeilen.join('\n');
+  const btn = document.getElementById('colorCopy');
+  const fertig = ok => { btn.textContent = ok ? 'Copied ✓' : 'Copy not possible'; setTimeout(() => { btn.textContent = 'Copy Colors'; }, 1800); };
+  const notfall = () => {                  // Ersatzweg, falls die moderne Zwischenablage gesperrt ist
+    try {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); fertig(ok);
+    } catch (e) { fertig(false); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => fertig(true), notfall);
+  else notfall();
+});
+
+/* Beispiel-Ablauf: "Nächster Schritt" wandert mit, Drucken wird erst nach Erstellen frei */
+const create = document.querySelector('[data-act="create"]');
+const print  = document.querySelector('[data-act="print"]');
+const status = document.getElementById('status');
+function emphasize(next) { [create, print].forEach(b => b.classList.toggle('btn-emphasized', b === next)); }
+document.querySelectorAll('.window button.btn[data-act]').forEach(b => {
+  b.addEventListener('click', () => {
+    status.textContent = 'Button “' + b.textContent + '” pressed.';
+    if (b === create) { print.disabled = false; emphasize(print); }
+    if (b.dataset.act === 'reset') { print.disabled = true; emphasize(create); }
+  });
+});
+
+/* Nur Demo: Schalter für "ganzer Text in Comic" */
+const comicBtn = document.getElementById('comicToggle');
+comicBtn.addEventListener('click', () => {
+  const on = document.body.classList.toggle('text-comic');
+  comicBtn.textContent = 'All text in Comic: ' + (on ? 'on' : 'off');
+});
+
+
+/* Gag: Geschwindigkeit der Platte einstellen (20 bis 60 s, 2er-Schritte).
+   Wird nicht gespeichert: nach dem Neuladen gilt wieder der Standard (24 s). */
+const DEFAULT_SPIN = 24;
+let spinSeconds = DEFAULT_SPIN;
+const mainVinyl = document.querySelector('.vinyl');
+const overlay = document.getElementById('spinOverlay');
+const range = document.getElementById('spinRange');
+const spinValue = document.getElementById('spinValue');
+const previewVinyl = document.getElementById('previewVinyl');
+function showPreview() {
+  const sec = Number(range.value) || DEFAULT_SPIN;
+  previewVinyl.style.setProperty('--spin', sec + 's');
+  spinValue.textContent = sec + ' s per revolution  →  --spin: ' + sec + 's;';
+}
+function openSpin() { range.value = spinSeconds; showPreview(); overlay.hidden = false; range.focus(); }
+function closeSpin() {                 // Schließen übernimmt immer den eingestellten Wert
+  spinSeconds = Number(range.value) || DEFAULT_SPIN;
+  mainVinyl.style.setProperty('--spin', spinSeconds + 's');
+  overlay.hidden = true;
+}
+document.getElementById('vinylLabel').addEventListener('click', openSpin);
+range.addEventListener('input', showPreview);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeSpin(); });   // Klick außerhalb
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeSpin(); });
+/* Textblock auf-/zuklappen */
+const textBlock = document.getElementById('textBlock');
+const textToggle = document.getElementById('textToggle');
+textToggle.addEventListener('click', () => {
+  const open = textBlock.classList.toggle('open');
+  textToggle.setAttribute('aria-expanded', open);
+  textToggle.setAttribute('aria-label', open ? 'Collapse text' : 'Expand text');
+});
+</script>
+</body>
+</html>
